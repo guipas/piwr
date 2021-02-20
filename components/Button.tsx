@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as _ from 'lodash';  
 
 interface IButtonStatus {
@@ -17,19 +17,11 @@ export const Button = (props: {
 }) => {
 
   const [loading, setLoading] = useState(true);
-  const [pressed, setPressed] = useState<boolean>(false);
+  // const [pressed, setPressed] = useState<boolean>(false);
   const [status, setStatus] = useState<IButtonStatus>({ state: 'success', text: '' });
   const [confirm, setConfirm] = useState(false);
 
-  useEffect(() => {
-    if (props.interval) {
-      const int = setInterval(() => {
-        check();
-      }, props.interval);
-
-      return () => clearInterval(int);
-    }
-  }, [props.interval])
+  
 
   useEffect(() => {
     console.log('button first status check');
@@ -55,6 +47,16 @@ export const Button = (props: {
     setLoading(false);
   }
 
+  useEffect(() => {
+    if (props.interval) {
+      const int = setInterval(() => {
+        check();
+      }, props.interval);
+
+      return () => clearInterval(int);
+    }
+  })
+
   const handleClick = async () => {
     if (loading) { return; }
 
@@ -79,8 +81,8 @@ export const Button = (props: {
   return (
     <div
       onClick={handleClick}
-      onMouseDown={() => setPressed(true)}
-      onMouseUp={() => setPressed(false)}
+      // onMouseDown={() => setPressed(true)}
+      // onMouseUp={() => setPressed(false)}
       style={{
         margin: 30,
         display: 'flex',

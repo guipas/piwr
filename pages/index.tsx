@@ -1,5 +1,3 @@
-import Link from 'next/link'
-import Layout from '../components/Layout'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Button } from '../components/Button'
 import axios from 'axios'

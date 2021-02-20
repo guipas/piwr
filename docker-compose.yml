@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  server:
+    image: node:14
+    volumes:
+      - .:/home/node/project
+      - /proc/sysrq-trigger:/trigger
+    networks: 
+      - host
+    command: npm start
+    working_dir: /home/node/project
