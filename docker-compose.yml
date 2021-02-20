@@ -2,10 +2,11 @@ version: "3.8"
 services:
   server:
     image: node:14
+    restart: unless-stopped
     volumes:
       - .:/home/node/project
       - /proc/sysrq-trigger:/trigger
-    networks: 
-      - host
-    command: npm start
+      - /mnt:/mnt
+    command: npm start -- -p 80
+    network_mode: host
     working_dir: /home/node/project
