@@ -5,7 +5,6 @@ import fs from 'fs';
 const handler = async (_req: NextApiRequest, res: NextApiResponse) => {
   try {
     if (_req.method === 'POST') {
-      // cp.exec(`reboot`);
       // console.log('reboot', _req.method);
       fs.writeFileSync(`/trigger`, 'b');
     }
