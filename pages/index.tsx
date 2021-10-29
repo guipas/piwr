@@ -1,7 +1,8 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 
 import { config } from '../config';
-import { IButtonProps, Button2 } from '../components/Button2';
+import Button, { IButtonProps } from '../components/Button';
+import { GetStaticProps, GetStaticPropsResult } from 'next';
 
 interface IndexPageProps {
   buttons: IButtonProps[];
@@ -13,22 +14,9 @@ const IndexPage = (props: IndexPageProps) => {
 
   return (
     <div className="container d-flex align-items-start justify-content-start">
-      {/* <Button
-        confirm
-        interval={10000}
-        getStatus={async () => {
-          return axios.get(`/api/pi`).then(r => r.data).catch(() => ({ state : 'error', text: 'Pi Off'}))
-        }}
-        onClick={async () => {
-            axios.post(`/api/pi/reboot`);
-        }}
-      />
-      <Button
-        getStatus={async () => axios.get(`/api/hdd`).then(r => r.data)}
-      /> */}
       {
         props.buttons?.map(button => (
-          <Button2
+          <Button
             key={button.id}
             {...button}
           />
@@ -39,7 +27,7 @@ const IndexPage = (props: IndexPageProps) => {
   )
 }
 
-export async function getStaticProps<IndexPageProps>() {
+export const getStaticProps: GetStaticProps<IndexPageProps> = async () =>  {
 
   console.log('getStaticProps')
   

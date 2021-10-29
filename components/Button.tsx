@@ -1,88 +1,98 @@
 import React, { useEffect, useState } from 'react';
 import * as _ from 'lodash';  
+import axios from 'axios';
+import { Labels, States } from '../interfaces/config';
 
 interface IButtonStatus {
-  state: 'success' | 'error';
+  state: States;
   text?: string;
 }
 
+export interface IButtonProps {
+  id: string;
+  action: boolean;
+  healthCheck: boolean;
+  labels?: Labels;
+}
 
-export const Button = (props: {
-  successTimeout?: number;
-  interval?: number;
-  onClick?: () => Promise<IButtonStatus | void>;
-  loading?: boolean;
-  getStatus: () => Promise<IButtonStatus>;
-  confirm?: boolean;
-}) => {
 
-  const [loading, setLoading] = useState(true);
-  // const [pressed, setPressed] = useState<boolean>(false);
-  const [status, setStatus] = useState<IButtonStatus>({ state: 'success', text: '' });
+export default (props: IButtonProps) => {
+
+  const [pending, setPending] = useState(false);
+  const [status, setStatus] = useState<IButtonStatus>({ state: 'success', text: '-' });
   const [confirm, setConfirm] = useState(false);
 
+  const interval = 10000000;
+  const confirmText = props?.labels?.confirm || 'Click again to confirm';
   
 
   useEffect(() => {
     console.log('button first status check');
-    props.getStatus?.().then(setStatus);
-    setLoading(false);
-  }, [props.getStatus]);
+    check();
+    setPending(false);
+  }, [props.healthCheck]);
 
   const check = async () => {
-    console.log('check', loading)
-    if (loading) { return; }
-    setLoading(true);
+    console.log('check', pending)
+    if (pending) { return; }
+
+    setPending(true);
     const minWait = new Promise((resolve) => setTimeout(resolve, 500));
     try {
-      const status = await props.getStatus();
-      setStatus(status);
-      await minWait;
-    } catch(e) {
+      const { data } = await axios.get(`/api/buttons/${props.id}/check`);
       setStatus({
-        text: e.toString(),
-        state: 'error',
+        text: data?.text || props.labels?.success || '-',
+        state: data?.state || 'success',
+      });
+      await minWait;
+    } catch(e: any) {
+      setStatus({
+        text: e.response?.data?.text || props.labels?.error || e.toString(),
+        state: e.response?.data?.state || 'error',
       });
     }
-    setLoading(false);
+    setPending(false);
   }
 
-  useEffect(() => {
-    if (props.interval) {
-      const int = setInterval(() => {
-        check();
-      }, props.interval);
-
-      return () => clearInterval(int);
-    }
-  })
-
-  const handleClick = async () => {
-    if (loading) { return; }
-
-    if (props.confirm && !confirm) {
+  const doAction = async () => {
+    if (!confirm) {
       setConfirm(true)
       setTimeout(() => { setConfirm(false); }, 3000);
       return;
     }
     
-    setLoading(true);
-    try {
-      await props.onClick?.();
-    } catch (e) {}
-    await check();
-    setLoading(false);
     setConfirm(false);
+    setStatus({
+      text: props.labels?.pending || 'loading...',
+      state: 'pending',
+    })
+    try {
+      const { data } = await axios.post(`/api/buttons/${props.id}/action`);
+      setStatus({
+        text: props.labels?.success, state: 'success',
+        ...data,
+      });
+    } catch (e: any) {
+      setStatus({
+        text: e.response?.data?.text || e.toString(),
+        state: e.response?.data?.state || 'error',
+      });
+    }
+    
+    
   }
 
-  const state = props.confirm && confirm ? 'error' : status.state;
-  const text = props.confirm && confirm ? 'confirm' : status.text;
+  useEffect(() => {
+    if (interval) {
+      const int = setInterval(check, interval);
+
+      return () => clearInterval(int);
+    }
+  })
 
   return (
     <div
-      onClick={handleClick}
-      // onMouseDown={() => setPressed(true)}
-      // onMouseUp={() => setPressed(false)}
+      onClick={doAction}
       style={{
         margin: 30,
         display: 'flex',
@@ -103,10 +113,10 @@ export const Button = (props: {
             style={{
               height: 10,
               width: 20,
-              background: loading ? 'rgb(255 200 0)' : state === 'success' ? '#22f133' : state === 'error' ? 'red' : 'rgb(241 241 241)',
+              background: pending ? 'rgb(255 200 0)' : status.state === 'success' ? '#22f133' : status.state === 'error' ? 'red' : 'rgb(241 241 241)',
               transition: 'all 200ms',
               borderRadius: 2,
-              boxShadow: loading ? 'rgba(255, 200, 0, 0.5) 0px 0px 15px 5px' : state === 'success' ? `rgb(135 255 144) 0px 0px 15px 5px` : state === 'error' ? 'rgb(255 144 144) 0px 0px 15px 5px' : '',
+              boxShadow: pending ? 'rgba(255, 200, 0, 0.5) 0px 0px 15px 5px' : status.state === 'success' ? `rgb(135 255 144) 0px 0px 15px 5px` : status.state === 'error' ? 'rgb(255 144 144) 0px 0px 15px 5px' : '',
               marginBottom: 10,
               display: 'flex',
               flexWrap: 'wrap',
@@ -119,7 +129,7 @@ export const Button = (props: {
         </div>
         <div className="text-center p-2 pb-0 text-break">
           <small>
-            {text}
+            {confirm ? confirmText : status.text}
           </small>
         </div>
 

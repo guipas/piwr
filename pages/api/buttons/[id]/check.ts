@@ -1,8 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import { config } from '../../../../config';
+import { Status } from '../../../../interfaces/config';
 
-const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse<Status>) => {
 
   const { id } = req.query;
   const button = config.buttons.find(b => b.id === id);
@@ -12,13 +13,21 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       try {
         const status = await button.healthCheck(req, res);
         
-        return res.json(status);
+        return res.json({
+          state: 'success',
+          ...status,
+        });
       } catch (e: any) {
         console.error(e);
-        return res.status(500).json({ state: 'error' });
+        return res.status(500).json({ 
+          state: e.state || 'error',
+          text: e.text || null,
+        });
       }
     } else {
-      return res.json(button.healthCheck);
+      return res.json({
+        state: 'success',
+      });
     }
   }
 

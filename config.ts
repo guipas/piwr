@@ -6,12 +6,12 @@ export const config: Config = {
   buttons: [
     {
       id: 'pi_status',
-      label: {
+      labels: {
         success: 'Pi on',
         error: 'Pi Off',
       },
       healthCheck: true,
-      action: (req: NextApiRequest, res: NextApiResponse) =>{
+      action: (req: NextApiRequest, res: NextApiResponse) => {
         if (req.method === 'POST') {
           fs.writeFileSync(`/trigger`, 'b');
         }
@@ -19,7 +19,7 @@ export const config: Config = {
     },
     {
       id: 'external_hdd_status',
-      label: {
+      labels: {
         success: 'HDD Connected',
         error: 'HDD Not Connected',
         pending: 'Checking HDD...',
@@ -30,14 +30,17 @@ export const config: Config = {
     },
     {
       id: 'test',
-      label: {
+      labels: {
         success: 'Test ok',
         error: 'Test error',
         pending: 'Checking test...',
       },
       healthCheck: async () => {
+        
       },
-      action: () => true,
+      action: () => {
+        return new Promise(resolve => setTimeout(resolve, 1000))
+      },
     },
   ]
 };
