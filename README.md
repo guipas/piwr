@@ -17,6 +17,8 @@ Features:
   - Each button can have an `action`, ie a function that will run in the backend when clicking on the button.
 - Run it with the `docker-compose` file included
 
+**Important note:** this application does not implement any authentication system. I don't care because I run it on a local network, with a limited number of actions to perform... but keep in mind that if you dont protect this application behind, for example, an API gateway, everybody on your network will be able to use this remote control.
+
 #### Install
 
 1. Clone this repo `git clone git@github.com:guipas/telepi.git`
