@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import * as _ from 'lodash';  
 import axios from 'axios';
-import { Labels, States } from '../interfaces/config';
 
-interface IButtonStatus {
-  state: States;
-  text?: string;
-}
+import styles from './Button.module.css';
+import { Labels, Status } from '../interfaces/button';
+
 
 export interface IButtonProps {
   id: string;
@@ -16,24 +14,17 @@ export interface IButtonProps {
 }
 
 
-export default (props: IButtonProps) => {
+const Button = (props: IButtonProps) => {
 
   const [pending, setPending] = useState(false);
-  const [status, setStatus] = useState<IButtonStatus>({ state: 'success', text: '-' });
+  const [timeoutId, setTimeoutId] = useState<number | null>();
+  const [status, setStatus] = useState<Status>({ state: 'success', text: '-' });
   const [confirm, setConfirm] = useState(false);
 
   const interval = 10000000;
   const confirmText = props?.labels?.confirm || 'Click again to confirm';
-  
-
-  useEffect(() => {
-    console.log('button first status check');
-    check();
-    setPending(false);
-  }, [props.healthCheck]);
 
   const check = async () => {
-    console.log('check', pending)
     if (pending) { return; }
 
     setPending(true);
@@ -55,13 +46,10 @@ export default (props: IButtonProps) => {
   }
 
   const doAction = async () => {
-    if (!confirm) {
-      setConfirm(true)
-      setTimeout(() => { setConfirm(false); }, 3000);
-      return;
+    if (timeoutId) { // removing the timout that cancel confirmation after a few seconds (see handleClick)
+      clearTimeout(timeoutId);
+      setTimeoutId(null);
     }
-    
-    setConfirm(false);
     setStatus({
       text: props.labels?.pending || 'loading...',
       state: 'pending',
@@ -78,10 +66,25 @@ export default (props: IButtonProps) => {
         state: e.response?.data?.state || 'error',
       });
     }
-    
-    
   }
 
+  const handleClick = async () => {
+    if (!confirm) {
+      setConfirm(true)
+      // setting a timout to go back to original tate when user does not confirm after a few second:
+      setTimeoutId(setTimeout(() => { setConfirm(false); }, 3000) as any)
+      return;
+    }
+    
+    setConfirm(false);
+    doAction();
+  }
+
+  useEffect(() => {
+    check();
+    setPending(false);
+  }, [props.healthCheck]);
+  
   useEffect(() => {
     if (interval) {
       const int = setInterval(check, interval);
@@ -92,48 +95,15 @@ export default (props: IButtonProps) => {
 
   return (
     <div
-      onClick={doAction}
-      style={{
-        margin: 30,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
-        width: '120px',
-        height: '120px',
-        // border: `3px solid ${success === true ? '#3fce4a' : success === false ? '#ffdddd' : '#dddddd'}`,
-        cursor: 'pointer',
-        boxShadow: '20px 20px 60px #d9d9d9, -20px -20px 60px #ffffff',
-        borderRadius: 20,
-      }}
+      onClick={handleClick}
+      className={styles.button}
     >
-      <div style={{ width: '100%' }} className="pt-2">
-        <div style={{ display: 'flex', justifyContent: 'center' }}>
-          <div 
-            style={{
-              height: 10,
-              width: 20,
-              background: pending ? 'rgb(255 200 0)' : status.state === 'success' ? '#22f133' : status.state === 'error' ? 'red' : 'rgb(241 241 241)',
-              transition: 'all 200ms',
-              borderRadius: 2,
-              boxShadow: pending ? 'rgba(255, 200, 0, 0.5) 0px 0px 15px 5px' : status.state === 'success' ? `rgb(135 255 144) 0px 0px 15px 5px` : status.state === 'error' ? 'rgb(255 144 144) 0px 0px 15px 5px' : '',
-              marginBottom: 10,
-              display: 'flex',
-              flexWrap: 'wrap',
-              overflow: 'hidden',
-              justifyContent: 'center'
-            }}
-          >
-          </div>
-
+      <div className={`${styles.led} ${styles[status.state]}`} />
+        <div className={styles.text}>
+          {confirm ? confirmText : status.text}
         </div>
-        <div className="text-center p-2 pb-0 text-break">
-          <small>
-            {confirm ? confirmText : status.text}
-          </small>
-        </div>
-
-      </div>
     </div>
   )
-}
+};
+
+export default Button;

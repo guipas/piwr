@@ -3,12 +3,15 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { Config } from './interfaces/config';
 
 export const config: Config = {
+  title: 'My Raspberry Pie',
   buttons: [
     {
       id: 'pi_status',
       labels: {
-        success: 'Pi on',
-        error: 'Pi Off',
+        success: 'On',
+        error: 'Off',
+        confirm: 'Reboot ?',
+        pending: 'Rebooting',
       },
       healthCheck: true,
       action: (req: NextApiRequest, res: NextApiResponse) => {
@@ -20,27 +23,17 @@ export const config: Config = {
     {
       id: 'external_hdd_status',
       labels: {
-        success: 'HDD Connected',
-        error: 'HDD Not Connected',
+        success: 'HDD',
+        error: 'HDD Disconnected',
         pending: 'Checking HDD...',
       },
       healthCheck: async () => {
-        await fs.promises.readdir(`/mnt/seagate/plex/data`, 'utf-8');
+        if (process.env.TELEPI_HDD_PATH) {
+          await fs.promises.readdir(process.env.TELEPI_HDD_PATH, 'utf-8');
+        } else {
+          console.error(`Enable to check if the HDD is connnected. The env varible TELEPI_HDD_PATH is not set`);
+        }
       }
-    },
-    {
-      id: 'test',
-      labels: {
-        success: 'Test ok',
-        error: 'Test error',
-        pending: 'Checking test...',
-      },
-      healthCheck: async () => {
-        
-      },
-      action: () => {
-        return new Promise(resolve => setTimeout(resolve, 1000))
-      },
     },
   ]
 };

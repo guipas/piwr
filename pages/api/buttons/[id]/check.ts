@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next'
 
 import { config } from '../../../../config';
-import { Status } from '../../../../interfaces/config';
+import { Status } from '../../../../interfaces/button';
 
 const handler = async (req: NextApiRequest, res: NextApiResponse<Status>) => {
 
