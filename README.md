@@ -3,7 +3,7 @@
 
 A small application that serves as a remote control for a raspbery pie. You can configure buttons by modifying the `config.ts` file.
 
-<div style="text-align:center;padding: 20px;">
+<div style="text-align:center;margin: 30px;background: #dedede; padding: 10px;border-radius:10px;">
   <img src="https://github.com/guipas/telepi/raw/main/telepi.png"/>
 </div>
 
