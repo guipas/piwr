@@ -4,7 +4,7 @@
 A small application that serves as a remote control for a raspbery pie. You can configure buttons by modifying the `config.ts` file.
 
 <div style="text-align:center;padding: 20px;">
-![alt text](https://github.com/guipas/telepi/blob/master/telepi.png?raw=true)
+  <img src="https://github.com/guipas/telepi/raw/main/telepi.png"/>
 </div>
 
 - Neumorphic styles
