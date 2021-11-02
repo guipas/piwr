@@ -1,5 +1,5 @@
 
-### Telepi
+### Piwr (Pi Web Remote)
 
 A small application that serves as a remote control for a raspbery pie. You can configure buttons by modifying the `config.ts` file.
 
